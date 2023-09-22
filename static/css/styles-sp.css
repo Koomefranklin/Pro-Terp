@@ -1,0 +1,102 @@
+body {
+    font-family:'Courier New', Courier, monospace;
+    margin: 0;
+    padding: 0;
+    background-color: rgb(0, 111, 185);
+}
+
+nav{
+    height: 40px;
+    background-color: orangered;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+}
+
+.logo{
+    color: white;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: x-large;
+    font-weight: 800;
+    padding: 0 2rem;    
+}
+
+nav a{
+    text-decoration: none;
+    color: white;
+    padding: 0 1.5rem;
+    font-size: medium;
+    font-weight: 500;
+}
+
+nav a:hover{
+    color: orangered;
+    background: black;
+}
+.tab{
+    position: relative;
+    right: 50px;
+}
+
+.hero-container{
+    align-items: center;
+    height: 20px;
+    font-size: medium;
+    left: 10px;
+
+}
+
+button{
+    padding: 1rem 3 rem;
+    font-size: x-large;
+    border: none;
+    color: orangered;
+    background: black;
+    cursor: pointer;
+    border-radius: 50px;
+
+}
+
+button:hover{
+    background: white;
+    color: black;
+}
+.img-hero{
+    align-items: center;
+    width: 100px;
+    height: 100px;
+}
+
+.about{
+    box-sizing: border-box;
+    align-items: center;
+    padding: 1rem;
+    border: black;
+    border-style: ridge;
+}
+
+.studentportal{
+    align-items: center;
+}
+
+footer{
+    align-items: center;
+}
+.footer-content{
+    align-items: center;
+}
+.footer-links{
+    align-items: center;
+    padding: 1px;
+}
+
+.footer-social{
+    align-items: center;
+}
+@media screen and (max-width: 700px) {
+    .hero-container{
+        grid-template-columns: 1fr 1fr;
+    }
+    
+}
