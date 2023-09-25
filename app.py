@@ -1,14 +1,15 @@
-import pylance
+# import pylance
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flask_uploads import UploadSet, configure_uploads, DOCUMENTS
+# from flask_uploads import UploadSet, configure_uploads, DOCUMENTS
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Change this to a secure key
 
 # Configure your SQLite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///student_portal.db'
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 # Configure Flask-Login
@@ -17,9 +18,9 @@ login_manager.login_view = 'login'
 login_manager.init_app(app)
 
 # Configure Flask-Uploads
-documents = UploadSet('documents', DOCUMENTS)
-app.config['UPLOADED_DOCUMENTS_DEST'] = 'uploads'
-configure_uploads(app, documents)
+# documents = UploadSet('documents', DOCUMENTS)
+# app.config['UPLOADED_DOCUMENTS_DEST'] = 'uploads'
+# configure_uploads(app, documents)
 
 # Define the User model
 class User(UserMixin, db.Model):
@@ -64,13 +65,16 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
+        print (user)
         if user and user.password == password:
             login_user(user)
             flash('Login successful!', 'success')
             return redirect(url_for('home'))
         else:
             flash('Login failed. Please check your username and password.', 'danger')
-    return render_template('login.html')
+            return render_template('login.html')
+    else:
+        return render_template('login.html')
 
 @app.route('/logout')
 @login_required
@@ -125,5 +129,6 @@ def upload():
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    db.create_all()
-    app.run(debug=True)
+    with app.app_context():
+        db.create_all()
+        app.run(debug=True)

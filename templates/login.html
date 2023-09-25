@@ -5,6 +5,10 @@
 </head>
 <body>
     <h1>Login</h1>
+    {% with messages = get_flashed_messages() %} {% if messages %} {% for msg in messages %}
+
+    {{msg}}
+    {% endfor %} {% endif %} {% endwith %}
     <form method="POST">
         <label for="username">Username:</label>
         <input type="text" name="username" required><br>

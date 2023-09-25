@@ -63,8 +63,11 @@ button:hover{
     color: black;
 }
 .img-hero{
-    align-items: center;
-    width: 100px;
+    /* align-items: center; */
+    position: absolute;
+    display: flex;
+    justify-self: right;
+    width: auto;
     height: 100px;
 }
 
