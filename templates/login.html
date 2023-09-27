@@ -1,21 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-</head>
-<body>
-    <h1>Login</h1>
-    {% with messages = get_flashed_messages() %} {% if messages %} {% for msg in messages %}
-
-    {{msg}}
-    {% endfor %} {% endif %} {% endwith %}
-    <form method="POST">
-        <label for="username">Username:</label>
-        <input type="text" name="username" required><br>
-        <label for="password">Password:</label>
-        <input type="password" name="password" required><br>
-        <button type="submit">Login</button>
+{% extends "base2.html" %}
+{% block head %}
+{% endblock %}
+{% block header %}
+{% endblock %}
+{% block main %}
+<div class="grid place-content-center my-40">
+  <div class="w-96">
+    <form class="bg-gray-600 shadow-md rounded px-8 pt-6 pb-8 mb-4" action="#" method="post">
+      <div class="text-2xl font-extrabold text-center">ProTerp Log In</div>
+      <input type="text" name="token" value="{{ token }}" hidden>
+      <div class="mb-4">
+        <label class="block text-white text-sm font-bold mb-2" for="email">
+          Email
+        </label>
+        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" placeholder="email@test.mail" name="email">
+      </div>
+      <div class="mb-6">
+        <label class="block text-white text-sm font-bold mb-2" for="password">
+          Password
+        </label>
+        <input class="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-900 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" name="password">
+      </div>
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" type="submit">
+        Sign In
+      </button>
     </form>
-    <p>Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
-</body>
-</html>
+    <a class="inline-block align-baseline font-bold text-sm text-blue-700 hover:text-blue-900" href="{{ url_for('signup')}}">
+      Create Account
+    </a>
+  </div>
+</div>
+{% endblock %}

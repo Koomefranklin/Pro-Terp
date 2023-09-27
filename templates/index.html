@@ -1,19 +1,19 @@
-{% extends 'base.html' %}
+{% extends 'base2.html' %}
     
-    {% block nav %}
+    {% block header %}
         
-    {% endblock nav %}
+    {% endblock header %}
      
     {% block main %}
     
     
-    <section id="hero">
-        <div class="hero-container">
+    <section class="grid">
+        <div class="grid justify-center">
             <h1>Welcome to ProTerp Sign Language Training Centre</h1>
             <p>Your path to success begins here.</p>
-            <button class="button">Get Started</button>
+            <button class="rounded-md bg-black red-800">Get Started</button>
         </div>
-        <div class="img-hero">
+        <div class="grid place-self-end w-20 h-20">
             <img src="{{ url_for('static', filename='icons/logo2.png')}}" class="logo" aria-label="hero-img">
         </div>
     </section>

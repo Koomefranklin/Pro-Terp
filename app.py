@@ -1,39 +1,45 @@
 # import pylance
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-# from flask_uploads import UploadSet, configure_uploads, DOCUMENTS
+from passlib.hash import sha256_crypt
+from sqlalchemy.exc import IntegrityError
+import secrets
+import string
+import re
+import datetime
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Change this to a secure key
+app.secret_key = 'your_secret_key'
 
 # Configure your SQLite database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///student_portal.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///proterp.sqlite3'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.permanent_session_lifetime = datetime.timedelta(minutes=50)
 db = SQLAlchemy(app)
 
-# Configure Flask-Login
-login_manager = LoginManager()
-login_manager.login_view = 'login'
-login_manager.init_app(app)
-
-# Configure Flask-Uploads
-# documents = UploadSet('documents', DOCUMENTS)
-# app.config['UPLOADED_DOCUMENTS_DEST'] = 'uploads'
-# configure_uploads(app, documents)
 
 # Define the User model
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(120), nullable=False)
+class User(db.Model):
+    f_name = db.Column(db.String(100))
+    s_name = db.Column(db.String(100))
+    email = db.Column(db.String(100), primary_key = True)
+    password = db.Column(db.String(255))
+    salt = db.Column(db.String(255))
+
+    def __init__(self, f_name, l_name, email, password, salt):
+        self.email = email
+        self.f_name = f_name
+        self.l_name = l_name
+        self.password = password
+        self.salt = salt
 
 # Define the Student model
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     major = db.Column(db.String(80), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_mail = db.Column(db.Integer, db.ForeignKey('user.email'), nullable=False)
     user = db.relationship('User', backref='student', uselist=False)
 
 # Define the Course model
@@ -48,85 +54,138 @@ class Document(db.Model):
     student = db.relationship('Student', backref='documents')
     file = db.Column(db.String(255), nullable=False)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+def passwordValidation(password):
+    lowercase_regex = r'[a-z]'
+    uppercase_regex = r'[A-Z]'
+    digit_regex = r'\d'
+    special_chars_regex = r'[!@#$%^&*()_+=-]'
+    length_regex = r'^.{8,}$'
+    
+    conditions = [
+    bool(re.search(lowercase_regex, password)),
+    bool(re.search(uppercase_regex, password)),
+    bool(re.search(digit_regex, password)),
+    bool(re.search(special_chars_regex, password)),
+    bool(re.search(length_regex, password))
+    ]
+
+    return all(conditions)
 
 @app.route('/')
-@login_required
 def home():
-    students = Student.query.all()
-    courses = Course.query.all()
-    return render_template('index.html', students=students, courses=courses)
+    try:
+        user = session['user']
+        if User.query.filter(User.email == user):
+            students = Student.query.all()
+            courses = Course.query.all()
+            return render_template('index.html', students=students, courses=courses)
+    except:
+        flash("You'll need to login first")
+        return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
+    if request.method == "POST":
+        email = request.form['email']
         password = request.form['password']
-        user = User.query.filter_by(username=username).first()
-        print (user)
-        if user and user.password == password:
-            login_user(user)
-            flash('Login successful!', 'success')
-            return redirect(url_for('home'))
+        receivedToken = request.form['token']
+
+        if session['token'] == receivedToken:
+
+            user = User.query.filter(User.email == email).first()
+            user_salt = user.salt
+            saltedSecret = password + user_salt
+            if sha256_crypt.verify(saltedSecret, user.password):
+                session.pop('token', None)
+                session['user'] = user.email
+                flash("Login Successfull")
+                return redirect(url_for('home'))
+            else:
+                flash("Wrong email or password")
+                return redirect(url_for("login"))
         else:
-            flash('Login failed. Please check your username and password.', 'danger')
-            return render_template('login.html')
+            flash("Time out try again!")
+            return redirect(url_for("login"))
     else:
-        return render_template('login.html')
+        characters = list(string.ascii_letters + string.digits)
+        token = ''.join(secrets.choice(characters)for _ in range(16))
+        session['token'] = token
+        return render_template("login.html", title="Login", token=token)
 
 @app.route('/logout')
-@login_required
 def logout():
-    logout_user()
+    session.pop('user', None)
     return redirect(url_for('login'))
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    if request.method == 'POST':
-        username = request.form['username']
+    characters = list(string.ascii_letters + string.digits)
+    if request.method == "POST":
+        receivedToken = request.form['token']
+        f_name = request.form['f-name']
+        s_name = request.form['s-name']
+        email = request.form['email']
         password = request.form['password']
-        name = request.form['name']
-        major = request.form['major']
-
-        # Check if the username is already taken
-        existing_user = User.query.filter_by(username=username).first()
-        if existing_user:
-            flash('Username already exists. Please choose another username.', 'danger')
+        password2 = request.form['password2']
+        salt = ''.join(secrets.choice(characters) for _ in range(24))
+        if session['token'] and session['token'] == receivedToken:
+            if len(f_name) > 0 and len(s_name) > 0 and len(email) > 0 and \
+                len(password) > 0 and len(password2) > 0:
+                if password2 == password:
+                    if passwordValidation(password):
+                        salted_password = password + salt
+                        hashed_password = sha256_crypt.hash(salted_password)
+                        newUser = User(f_name, s_name, email, hashed_password, salt)
+                        try:
+                            db.session.add(newUser)
+                            db.session.commit()
+                            session.pop('token', None)
+                            flash("User Registered Sussessfully! Login")
+                            return redirect(url_for("login"))
+                        except IntegrityError:
+                            flash(f'Email already used!')
+                            return redirect(url_for('signup'))
+                    else:
+                        flash("Password criterion not met!")
+                        return redirect(url_for('signup'))
+                    
+                else:
+                    flash("Passwords do not match!")
+                    return redirect(url_for("signup"))
+            else:
+                flash("All Fields are Required!")
+                return redirect(url_for("signup"))
         else:
-            # Create a new user and student record
-            user = User(username=username, password=password)
-            db.session.add(user)
-            db.session.commit()
-
-            student = Student(name=name, major=major, user=user)
-            db.session.add(student)
-            db.session.commit()
-
-            flash('Account created successfully! You can now log in.', 'success')
-            return redirect(url_for('login'))
-
-    return render_template('signup.html')
+            flash("Try Again")
+            return redirect(url_for("signup"))
+    else:
+        token = ''.join(secrets.choice(characters)for _ in range(16))
+        session['token'] = token
+        return render_template("signup.html", title="Signup", token=token)
 
 @app.route('/upload', methods=['POST'])
-@login_required
 def upload():
-    if 'document' in request.files:
-        document = request.files['document']
-        if document:
-            document.save('uploads/' + document.filename)
+    try:
+        user = session['user']
+        if User.query.filter(User.email == user):
+            if 'document' in request.files:
+                document = request.files['document']
+                if document:
+                    document.save('uploads/' + document.filename)
 
-            # Save the uploaded document in the database
-            new_document = Document(student=current_user.student, file=document.filename)
-            db.session.add(new_document)
-            db.session.commit()
+                    # Save the uploaded document in the database
+                    new_document = Document(student=current_user.student, file=document.filename)
+                    db.session.add(new_document)
+                    db.session.commit()
 
-            flash('Document uploaded successfully!', 'success')
-        else:
-            flash('No file selected for upload.', 'danger')
+                    flash('Document uploaded successfully!', 'success')
+                else:
+                    flash('No file selected for upload.', 'danger')
 
-    return redirect(url_for('home'))
+            return redirect(url_for('home'))
+    except:
+        flash("You'll need to login first")
+        return redirect(url_for('login'))
 
 if __name__ == '__main__':
     with app.app_context():

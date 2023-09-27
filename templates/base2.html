@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet", href="{{url_for('static', filename='css/main.css')}}">
+        <!-- <link rel="{{ url_for('static', filename='css.css') }}"> -->
+        <script type="text/javascript" src="{{ url_for('static', filename='javascript.js') }}"></script>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+        <title> {{ title }}</title>
+        {% block head %}
+
+        {% endblock %}
+    </head>
+    <body class="bg-gray-900 text-white">
+        <script>password_show_hide()</script>
+        <div class="mx-2">
+        {% block header %}
+        <header>
+            <div class="grid place-self-center">Proterp Centre</div>
+            <div class="grid justify-content-center w-full stiky">
+                <a href="index.html">HOME</a>
+                <a href="Gallery.html">GALLERY</a>
+                <a href="Courses.html">COURSES</a>
+        
+            </div>
+          </header>
+        {% endblock %}
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+            <div class="grid place-content-center">
+                <div class="bg-white border border-blue-400 text-blue-700 py-2 rounded relative w-96" role="alert">
+                    <p class="text-center">{{msg}}</p>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        {% block main %}
+        {% endblock %}
+        </div>
+    </body>
+</html>

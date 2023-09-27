@@ -1,20 +1,75 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>ProTerp Sign Language Training Centre</title>
-</head>
-<body>
-    <h1>SIGN UP</h1>
-    <form method="POST">
-        <label for="username">Username:	</label>
-        <input type="text" name="username" required><br>
-        <label for="password">Password:	</label>
-        <input type="password" name="password" required><br>
-        <label for="name">Name:</label>
-        <input type="text" name="name" required><br>
-       
-        <button type="submit">Sign Up</button>
+{% extends "base2.html" %}
+{% block head %}
+{% endblock %}
+{% block header %}
+{% endblock %}
+{% block main %}
+<div class="grid place-content-center my-20">
+    <div class="w-100">
+     <form class="bg-gray-600 shadow-md rounded px-8 pt-6 pb-8 mb-4" action="#" method="post">
+        <div class="text-2xl font-extrabold text-center">ProTerp Registration</div>
+        <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
+            <input type="text" name="token" value="{{ token }}" hidden>
+            <div class="mb-4">
+                <label for="f-name" class="block text-white text-sm font-bold mb-2">First Name</label>
+                <input type="text" name="f-name" id="f-name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+                <label for="s-name" class="block text-white text-sm font-bold mb-2">Sir Name</label>
+                <input type="text" name="s-name" id="s-name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+        </div>
+        <div class="mb-4">
+            <label for="email" class="block text-white text-sm font-bold mb-2">Email</label>
+            <input type="email" name="email" id="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
+            <div class="mb-4">
+                <label for="password" class="block text-white text-sm font-bold mb-2">Password</label>
+                <div class="relative">
+                    <input type="password" name="password" id="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline">
+                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-900" onclick="password_show_hide()">
+                        <i class="fas fa-eye" id="show_eye"></i>
+                        <div class="hidden" id="hide_eye">
+                            <i class="fas fa-eye-slash"></i>
+                        </div>
+                    </span>
+                </div>
+                <div id="password-pattern" class="hidden">
+                    <div class="text-red-900 text-xs flex flex-col">
+                        <input type="checkbox" id="upper" class="hidden" disabled readonly>
+                        <label for="upper">Should contain at least 1 upper-case character</label>
+                        <input type="checkbox" id="lower" class="hidden" disabled readonly>
+                        <label for="lower">Should contain at least 1 lower-case character</label>
+                        <input type="checkbox" id="special-character" class="hidden" disabled readonly>
+                        <label for="special-character">Should contain a special character</label>
+                        <input type="checkbox" id="number" class="hidden" disabled readonly>
+                        <label for="number">Should contain a numeric digit (0 thru 9)</label>
+                        <input type="checkbox" id="length" class="hidden" disabled readonly>
+                        <label for="length">Should be at-least 8 characters long</label>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="password2" class="block text-white text-sm font-bold mb-2">Confirm Password</label>
+                <div class="relative">
+                    <input type="password" id="password2" name="password2" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:shadow-outline">
+                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-900" onclick="password2_show_hide()">
+                        <i class="fas fa-eye" id="show_eye2"></i>
+                        <div class="hidden"  id="hide_eye2">
+                            <i class="fas fa-eye-slash"></i>
+                        </div>
+                    </span>
+                </div>
+                <div id="matching-password" class="text-xs text-red-900 hidden">
+                    Passwords don't match
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full disabled:bg-gray-300" id="register">Register</button>
+        <script type="text/javascript">check_passwords()</script>
     </form>
-    <p>Already have an account?  <a href="/templates/login.html">LOG IN</a></p>
-</body>
-</html>
+    Already have an account? <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="{{ url_for('login') }}">Login</a>
+    </div>
+</div>
+{% endblock %}
